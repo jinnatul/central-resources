@@ -1,4 +1,4 @@
-export const ForgotTemplate = (name, link) => {
+export const forgotTemplate = (name, link) => {
   return `
   <!DOCTYPE html>
   <html>
@@ -426,5 +426,5 @@ export const ForgotTemplate = (name, link) => {
   </body>
   
   </html>
-  `
-}
+  `;
+};

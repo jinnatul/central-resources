@@ -15,16 +15,16 @@ const sendErrorProd = (err, res) => {
 };
 
 export default (err, req, res, next) => {
-  console.log("Global", err);
+  console.log('Global', err);
   err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
+  err.status = err.status || 'error';
 
-  if (err.message === "invalid_request" || err.message === "invalid_grant") {
+  if (err.message === 'invalid_request' || err.message === 'invalid_grant') {
     // only for google auth
-    err.message = "Request failed! Try again later.";
+    err.message = 'Request failed! Try again later.';
   }
 
-  if (process.env.STAGE === "Development") {
+  if (process.env.STAGE === 'Development') {
     sendErrorDev(err, res);
   } else {
     sendErrorProd(err, res);

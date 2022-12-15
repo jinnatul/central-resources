@@ -1,17 +1,12 @@
-import Sequelize from "sequelize";
+import sequelize from 'sequelize';
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  {
-    host: process.env.HOST,
-    dialect: process.env.DB_DIALECT,
-    logging: false,
-  }
-);
+const db = new sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASS, {
+  host: process.env.HOST,
+  dialect: process.env.DB_DIALECT,
+  logging: false,
+});
 
-// const sequelize = new Sequelize(process.env.DB_NAME, null, null, {
+// const db = new sequelize(process.env.DB_NAME, null, null, {
 //   dialect: process.env.DB_DIALECT,
 //   replication: {
 //     read: [
@@ -36,4 +31,4 @@ const sequelize = new Sequelize(
 //   },
 // });
 
-export default sequelize;
+export default db;

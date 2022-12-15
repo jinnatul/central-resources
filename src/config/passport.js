@@ -1,18 +1,19 @@
-import passport from "passport";
-import { Strategy } from "passport-google-oauth20";
-import Users from "../models/Users";
-import UserRoleMaps from "../models/UserRoleMaps";
-import CreateJWT from "../utils/CreateJWT";
-import CreateMFA from "../utils/CreateMFA";
+import passport from 'passport';
+import { Strategy } from 'passport-google-oauth20';
+import users from '../models/users';
+import userRoleMaps from '../models/userRoleMaps';
+import createJWT from '../utils/createJWT';
 
 const generateToken = async (profile) => {
   const { given_name, family_name, email } = profile._json;
-  let UserInfo = await Users.findOne({
+
+  let userInfo = await users.findOne({
     where: { email: email },
   });
-  if (!UserInfo) {
-    const { mfa_secret, mfa_qr } = await CreateMFA();
-    UserInfo = await Users.create({
+
+  if (!userInfo) {
+    const { mfa_secret, mfa_qr } = await createJWT();
+    userInfo = await users.create({
       f_name: given_name,
       l_name: family_name,
       email,
@@ -22,22 +23,22 @@ const generateToken = async (profile) => {
       mfa_qr,
     });
 
-    await UserRoleMaps.create({
-      user_id: UserInfo.id,
+    await userRoleMaps.create({
+      user_id: userInfo.id,
       role_id: 2,
     });
   }
 
-  return UserInfo
+  return userInfo
     ? {
-        status: "success",
-        id: UserInfo.id,
+        status: 'success',
+        id: userInfo.id,
         f_name: given_name,
         l_name: family_name,
-        token: CreateJWT(UserInfo.id, given_name, family_name, email, 2, "7d"),
+        token: createJWT(userInfo.id, given_name, family_name, email, 2, '7d'),
       }
     : {
-        status: "fail",
+        status: 'fail',
       };
 };
 
@@ -47,7 +48,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: process.env.GOOGLE_CALLBACK_URL,
-      accessType: "offline",
+      accessType: 'offline',
     },
     (accessToken, refreshToken, profile, cb) => {
       cb(null, generateToken(profile));

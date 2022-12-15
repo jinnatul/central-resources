@@ -1,16 +1,16 @@
-import { AES } from "crypto-js";
-import bcrypt from "bcryptjs";
-import moment from "moment";
-import speakeasy from "speakeasy";
-import Users from "../models/Users";
-import UserRoleMaps from "../models/UserRoleMaps";
-import SendEmail from "../config/SendEmail";
-import { SignUpTemplate } from "../utils/templates/SignUpMail";
-import { ForgotTemplate } from "../utils/templates/ForgotMail";
-import SendMessage from "../utils/responses/SendMessage";
-import SendData from "../utils/responses/SendData";
-import CreateJWT from "../utils/CreateJWT";
-import CreateMFA from "../utils/CreateMFA";
+import { AES } from 'crypto-js';
+import bcrypt from 'bcryptjs';
+import moment from 'moment';
+import speakeasy from 'speakeasy';
+import users from '../models/users';
+import userRoleMaps from '../models/userRoleMaps';
+import sendEmail from '../config/sendEmail';
+import { signUpTemplate } from '../utils/templates/signUpMail';
+import { forgotTemplate } from '../utils/templates/forgotMail';
+import sendMessage from '../utils/responses/sendMessage';
+import sendData from '../utils/responses/sendData';
+import createJWT from '../utils/createJWT';
+import createMFA from '../utils/createMFA';
 import {
   validateSignUp,
   validateResentOtp,
@@ -18,12 +18,12 @@ import {
   validateSignIn,
   validateMfaVerification,
   validateResetPassword,
-} from "../models/Validation";
+} from '../models/validations';
 
 export const googleAuth = async (req, res, next) => {
   try {
     const { status, id, f_name, l_name, token } = await req.user;
-    if (status === "success") {
+    if (status === 'success') {
       const encryptedToken = AES.encrypt(
         JSON.stringify({
           id,
@@ -33,9 +33,7 @@ export const googleAuth = async (req, res, next) => {
         }),
         process.env.SESSION_SECRET
       );
-      res.redirect(
-        `${process.env.FRONT_END}/login?status=${status}&token=${encryptedToken}`
-      );
+      res.redirect(`${process.env.FRONT_END}/login?status=${status}&token=${encryptedToken}`);
     } else {
       res.redirect(`${process.env.FRONT_END}?status=${status}`);
     }
@@ -53,53 +51,49 @@ export const signUp = async (req, res, next) => {
 
     const { f_name, l_name, email, phone, password } = req.body;
 
-    let UserInfo = await Users.findOne({
+    let userInfo = await users.findOne({
       where: {
         email,
       },
     });
-    if (UserInfo) {
-      const error = new Error("Already use this email!");
+    if (userInfo) {
+      const error = new Error('Already use this email!');
       error.flag = true;
       error.statusCode = 409;
       return next(error);
     }
 
-    const Otp = Math.floor(100000 + Math.random() * 900000);
-    const OtpExpire = moment().add(10, "minutes");
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otp_expire = moment().add(10, 'minutes');
     const hashPass = await bcrypt.hash(password, 12);
-    const { mfa_secret, mfa_qr } = await CreateMFA();
+    const { mfa_secret, mfa_qr } = await createMFA();
 
-    UserInfo = await Users.create({
+    userInfo = await users.create({
       f_name,
       l_name,
       email,
       phone,
       password: hashPass,
-      otp: Otp,
-      otp_expire: OtpExpire,
+      otp,
+      otp_expire,
       mfa_secret,
       mfa_qr,
     });
-    if (!UserInfo) {
-      const error = new Error("Something went wrong when creating an account!");
+    if (!userInfo) {
+      const error = new Error('Something went wrong when creating an account!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
-    await UserRoleMaps.create({
-      user_id: UserInfo.id,
+    await userRoleMaps.create({
+      user_id: userInfo.id,
       role_id: 2,
     });
 
-    await SendEmail(
-      email,
-      `Email verification code: ${Otp}`,
-      SignUpTemplate(Otp, `${f_name} ${l_name}`)
-    );
+    await sendEmail(email, `Email verification code: ${otp}`, signUpTemplate(otp, `${f_name} ${l_name}`));
 
-    SendMessage(res, "Please check your email for OTP verification");
+    sendMessage(res, 'Please check your email for OTP verification');
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -114,28 +108,28 @@ export const resentOtp = async (req, res, next) => {
 
     const { email } = req.body;
 
-    let UserInfo = await Users.findOne({
+    let userInfo = await users.findOne({
       where: {
         email,
         is_verified: false,
         is_delete: false,
       },
     });
-    if (!UserInfo) {
-      const error = new Error("User not found!");
+    if (!userInfo) {
+      const error = new Error('User not found!');
       error.flag = true;
       error.statusCode = 409;
       return next(error);
     }
 
-    const Otp = Math.floor(100000 + Math.random() * 900000);
-    const OtpExpire = moment().add(10, "minutes");
-    const { f_name, l_name } = UserInfo;
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otp_expire = moment().add(10, 'minutes');
+    const { f_name, l_name } = userInfo;
 
-    UserInfo = await Users.update(
+    userInfo = await users.update(
       {
-        otp: Otp,
-        otp_expire: OtpExpire,
+        otp,
+        otp_expire,
       },
       {
         where: {
@@ -143,20 +137,16 @@ export const resentOtp = async (req, res, next) => {
         },
       }
     );
-    if (!UserInfo) {
-      const error = new Error("Something went wrong when sending an otp!");
+    if (!userInfo) {
+      const error = new Error('Something went wrong when sending an otp!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
-    await SendEmail(
-      email,
-      `Email verification code: ${Otp}`,
-      SignUpTemplate(Otp, `${f_name} ${l_name}`)
-    );
+    await sendEmail(email, `Email verification code: ${otp}`, SignUpTemplate(otp, `${f_name} ${l_name}`));
 
-    SendMessage(res, "Please check your email for OTP verification");
+    sendMessage(res, 'Please check your email for OTP verification');
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -171,11 +161,11 @@ export const otpVerification = async (req, res, next) => {
 
     const { email, otp } = req.body;
 
-    let UserInfo = await Users.findOne({
+    let userInfo = await users.findOne({
       include: [
         {
-          as: "role_info",
-          model: UserRoleMaps,
+          as: 'role_info',
+          model: userRoleMaps,
         },
       ],
       where: {
@@ -185,31 +175,31 @@ export const otpVerification = async (req, res, next) => {
       },
     });
 
-    if (!UserInfo) {
-      const error = new Error("User not found!");
+    if (!userInfo) {
+      const error = new Error('User not found!');
       error.flag = true;
       error.statusCode = 404;
       return next(error);
     }
 
-    const { id, f_name, l_name, phone, otp_expire, role_info } = UserInfo;
+    const { id, f_name, l_name, phone, otp_expire, role_info } = userInfo;
 
-    if (otp !== UserInfo.otp) {
-      const error = new Error("Your otp has not to match!");
+    if (otp !== userInfo.otp) {
+      const error = new Error('Your otp has not to match!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
-    const isValid = moment().isBefore(otp_expire, "seconds");
+    const isValid = moment().isBefore(otp_expire, 'seconds');
     if (!isValid) {
-      const error = new Error("Your otp has been expired!");
+      const error = new Error('Your otp has been expired!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
-    await Users.update(
+    await users.update(
       {
         is_verified: true,
       },
@@ -221,21 +211,14 @@ export const otpVerification = async (req, res, next) => {
     );
 
     const { role_id } = role_info;
-    SendData(res, {
+    sendData(res, {
       id,
       f_name,
       l_name,
       email,
       phone,
       role_id,
-      token: CreateJWT(
-        id,
-        f_name,
-        l_name,
-        email,
-        role_id,
-        role_id === 1 ? "3h" : "7d"
-      ),
+      token: createJWT(id, f_name, l_name, email, role_id, role_id === 1 ? '3h' : '7d'),
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -251,11 +234,11 @@ export const signIn = async (req, res, next) => {
 
     const { email, password } = req.body;
 
-    let UserInfo = await Users.findOne({
+    let userInfo = await users.findOne({
       include: [
         {
-          as: "role_info",
-          model: UserRoleMaps,
+          as: 'role_info',
+          model: userRoleMaps,
         },
       ],
       where: {
@@ -263,32 +246,31 @@ export const signIn = async (req, res, next) => {
         is_delete: false,
       },
     });
-    if (!UserInfo) {
-      const error = new Error("Email or password is incorrect!");
+    if (!userInfo) {
+      const error = new Error('Email or password is incorrect!');
       error.flag = true;
       error.statusCode = 404;
       return next(error);
     }
 
-    const { id, f_name, l_name, phone, is_verified, mfa_enables, role_info } =
-      UserInfo;
+    const { id, f_name, l_name, phone, is_verified, mfa_enables, role_info } = userInfo;
 
-    const isEqual = await bcrypt.compare(password, UserInfo.password);
+    const isEqual = await bcrypt.compare(password, userInfo.password);
     if (!isEqual) {
-      const error = new Error("Email or password is incorrect!");
+      const error = new Error('Email or password is incorrect!');
       error.flag = true;
       error.statusCode = 401;
       return next(error);
     }
 
     if (!is_verified) {
-      const Otp = Math.floor(100000 + Math.random() * 900000);
-      const OtpExpire = moment().add(10, "minutes");
+      const otp = Math.floor(100000 + Math.random() * 900000);
+      const otp_expire = moment().add(10, 'minutes');
 
-      UserInfo = await Users.update(
+      userInfo = await users.update(
         {
-          otp: Otp,
-          otp_expire: OtpExpire,
+          otp,
+          otp_expire,
         },
         {
           where: {
@@ -296,36 +278,32 @@ export const signIn = async (req, res, next) => {
           },
         }
       );
-      if (!UserInfo) {
-        const error = new Error("Something went wrong when sending an otp!");
+      if (!userInfo) {
+        const error = new Error('Something went wrong when sending an otp!');
         error.flag = true;
         error.statusCode = 500;
         return next(error);
       }
 
-      await SendEmail(
-        email,
-        `Email verification code: ${Otp}`,
-        SignUpTemplate(Otp, `${f_name} ${l_name}`)
-      );
+      await sendEmail(email, `Email verification code: ${otp}`, signUpTemplate(otp, `${f_name} ${l_name}`));
 
-      return SendData(res, {
+      return sendData(res, {
         is_verified,
         email,
-        message: "Please check your email for OTP verification",
+        message: 'Please check your email for OTP verification',
       });
     }
 
     const { role_id } = role_info;
     if (mfa_enables) {
-      SendData(res, {
+      sendData(res, {
         is_verified,
         id,
         role_id,
         mfa_enables,
       });
     } else {
-      SendData(res, {
+      sendData(res, {
         is_verified,
         id,
         f_name,
@@ -334,14 +312,7 @@ export const signIn = async (req, res, next) => {
         phone,
         role_id,
         mfa_enables,
-        token: CreateJWT(
-          id,
-          f_name,
-          l_name,
-          email,
-          role_id,
-          role_id === 1 ? "3h" : "7d"
-        ),
+        token: createJWT(id, f_name, l_name, email, role_id, role_id === 1 ? '3h' : '7d'),
       });
     }
   } catch (err) {
@@ -358,55 +329,48 @@ export const mfaVerification = async (req, res, next) => {
 
     const { id, token } = req.body;
 
-    const UserInfo = await Users.findOne({
+    const userInfo = await users.findOne({
       include: [
         {
-          as: "role_info",
-          model: UserRoleMaps,
+          as: 'role_info',
+          model: userRoleMaps,
         },
       ],
       where: {
         id,
       },
     });
-    if (!UserInfo) {
-      const error = new Error("User not found!");
+    if (!userInfo) {
+      const error = new Error('User not found!');
       error.flag = true;
       error.statusCode = 404;
       return next(error);
     }
 
-    const { f_name, l_name, email, phone, mfa_secret, role_info } = UserInfo;
+    const { f_name, l_name, email, phone, mfa_secret, role_info } = userInfo;
 
     const verified = speakeasy.totp.verify({
       secret: mfa_secret,
-      encoding: "base32",
+      encoding: 'base32',
       token,
     });
 
     if (!verified) {
-      const error = new Error("Invalid token!");
+      const error = new Error('Invalid token!');
       error.flag = true;
       error.statusCode = 402;
       return next(error);
     }
 
     const { role_id } = role_info;
-    SendData(res, {
+    sendData(res, {
       id,
       f_name,
       l_name,
       email,
       phone,
       role_id,
-      token: CreateJWT(
-        id,
-        f_name,
-        l_name,
-        email,
-        role_id,
-        role_id === 1 ? "3h" : "7d"
-      ),
+      token: createJWT(id, f_name, l_name, email, role_id, role_id === 1 ? '3h' : '7d'),
     });
   } catch (err) {
     if (!err.statusCode) {
@@ -420,30 +384,22 @@ export const getProfile = async (req, res, next) => {
   try {
     const { id } = req.user;
 
-    const UserInfo = await Users.findOne({
-      attributes: [
-        "id",
-        "f_name",
-        "l_name",
-        "email",
-        "phone",
-        "mfa_enables",
-        "mfa_qr",
-      ],
+    const userInfo = await users.findOne({
+      attributes: ['id', 'f_name', 'l_name', 'email', 'phone', 'mfa_enables', 'mfa_qr'],
       where: {
         id,
         is_verified: true,
         is_delete: false,
       },
     });
-    if (!UserInfo) {
-      const error = new Error("User not found!");
+    if (!userInfo) {
+      const error = new Error('User not found!');
       error.flag = true;
       error.statusCode = 404;
       return next(error);
     }
 
-    SendData(res, UserInfo);
+    sendData(res, userInfo);
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -458,27 +414,27 @@ export const forgotPassword = async (req, res, next) => {
 
     const { email } = req.body;
 
-    let UserInfo = await Users.findOne({
+    let userInfo = await users.findOne({
       where: {
         email,
         is_delete: false,
       },
     });
-    if (!UserInfo) {
-      const error = new Error("User not found!");
+    if (!userInfo) {
+      const error = new Error('User not found!');
       error.flag = true;
       error.statusCode = 409;
       return next(error);
     }
 
-    const Otp = Math.floor(100000 + Math.random() * 900000);
-    const reset_link = `${process.env.FRONT_END}/reset-password/otp=${Otp}&&email=${email}`;
-    const { f_name, l_name } = UserInfo;
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    const reset_link = `${process.env.FRONT_END}/reset-password/otp=${otp}&&email=${email}`;
+    const { f_name, l_name } = userInfo;
 
-    UserInfo = await Users.update(
+    userInfo = await users.update(
       {
         reset_link,
-        otp_expire: moment().add(10, "minutes"),
+        otp_expire: moment().add(10, 'minutes'),
       },
       {
         where: {
@@ -486,22 +442,16 @@ export const forgotPassword = async (req, res, next) => {
         },
       }
     );
-    if (!UserInfo) {
-      const error = new Error(
-        "Something went wrong when sending a verification link!"
-      );
+    if (!userInfo) {
+      const error = new Error('Something went wrong when sending a verification link!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
-    await SendEmail(
-      email,
-      "Reset your password",
-      ForgotTemplate(`${f_name} ${l_name}`, reset_link)
-    );
+    await sendEmail(email, 'Reset your password', forgotTemplate(`${f_name} ${l_name}`, reset_link));
 
-    SendMessage(res, "Please check your email for verification");
+    sendMessage(res, 'Please check your email for verification');
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -516,32 +466,32 @@ export const resetPassword = async (req, res, next) => {
 
     const { reset_link, password } = req.body;
 
-    let UserInfo = await Users.findOne({
+    let userInfo = await users.findOne({
       where: {
         reset_link,
         is_delete: false,
       },
     });
-    if (!UserInfo) {
-      const error = new Error("User not found!");
+    if (!userInfo) {
+      const error = new Error('User not found!');
       error.flag = true;
       error.statusCode = 409;
       return next(error);
     }
 
-    const { otp_expire } = UserInfo;
-    const isValid = moment().isBefore(otp_expire, "seconds");
+    const { otp_expire } = userInfo;
+    const isValid = moment().isBefore(otp_expire, 'seconds');
     if (!isValid) {
-      const error = new Error("Your verification link has been expired!");
+      const error = new Error('Your verification link has been expired!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
     const hashPass = await bcrypt.hash(password, 12);
-    UserInfo = await Users.update(
+    userInfo = await users.update(
       {
-        reset_link: "",
+        reset_link: '',
         password: hashPass,
       },
       {
@@ -550,16 +500,14 @@ export const resetPassword = async (req, res, next) => {
         },
       }
     );
-    if (!UserInfo) {
-      const error = new Error(
-        "Something went wrong when resetting the password!"
-      );
+    if (!userInfo) {
+      const error = new Error('Something went wrong when resetting the password!');
       error.flag = true;
       error.statusCode = 500;
       return next(error);
     }
 
-    SendMessage(res, "Password reset successfully");
+    sendMessage(res, 'Password reset successfully');
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;

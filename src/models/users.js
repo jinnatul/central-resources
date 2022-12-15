@@ -1,11 +1,11 @@
-import { DataTypes, literal } from "sequelize";
-import sequelize from "../config/Database";
-import UserRoleMaps from "../models/UserRoleMaps";
+import { DataTypes, literal } from 'sequelize';
+import sequelize from '../config/database';
+import userRoleMaps from '../models/userRoleMaps';
 
 const { STRING, DATE, BOOLEAN } = DataTypes;
 
-const Users = sequelize.define(
-  "users",
+const users = sequelize.define(
+  'users',
   {
     f_name: { type: STRING, allowNull: false },
     l_name: { type: STRING, allowNull: false },
@@ -22,22 +22,22 @@ const Users = sequelize.define(
     mfa_enables: { type: BOOLEAN, defaultValue: false },
     reset_link: { type: STRING, allowNull: true },
     created_at: {
-      type: "TIMESTAMP",
-      defaultValue: literal("CURRENT_TIMESTAMP"),
+      type: 'TIMESTAMP',
+      defaultValue: literal('CURRENT_TIMESTAMP'),
     },
     updated_at: {
-      type: "TIMESTAMP",
-      defaultValue: literal("CURRENT_TIMESTAMP"),
+      type: 'TIMESTAMP',
+      defaultValue: literal('CURRENT_TIMESTAMP'),
     },
   },
   {
     timestamps: true,
     schema: process.env.Schema,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   }
 );
 
-Users.hasOne(UserRoleMaps, { as: "role_info", foreignKey: "user_id" });
+users.hasOne(userRoleMaps, { as: 'role_info', foreignKey: 'user_id' });
 
-export default Users;
+export default users;
