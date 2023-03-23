@@ -20,7 +20,7 @@ app.get('/', (req, res, next) => {
 });
 app.use('/api/v1', router);
 app.get('/docs', (req, res) => {
-  res.redirect('');
+  res.redirect(''); // set your api dcos link
 });
 app.all('*', (req, res, next) => {
   const error = new Error(`Can't find ${req.originalUrl} on this server!`);

@@ -14,7 +14,7 @@ const auditLogs = sequelize.define(
     action: { type: STRING, allowNull: false },
     document: { type: STRING, allowNull: false },
     payload: { type: JSONB, allowNull: false },
-    is_delete: { type: BOOLEAN, defaultValue: false },
+    is_deleted: { type: BOOLEAN, defaultValue: false },
     created_at: {
       type: 'TIMESTAMP',
       defaultValue: literal('CURRENT_TIMESTAMP'),

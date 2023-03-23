@@ -8,7 +8,7 @@ const userRoleMaps = sequelize.define(
   {
     user_id: { type: INTEGER, allowNull: false },
     role_id: { type: INTEGER, allowNull: false },
-    is_delete: { type: BOOLEAN, defaultValue: false },
+    is_deleted: { type: BOOLEAN, defaultValue: false },
     created_at: {
       type: 'TIMESTAMP',
       defaultValue: literal('CURRENT_TIMESTAMP'),

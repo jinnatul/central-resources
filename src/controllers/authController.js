@@ -112,7 +112,7 @@ export const resentOtp = async (req, res, next) => {
       where: {
         email,
         is_verified: false,
-        is_delete: false,
+        is_deleted: false,
       },
     });
     if (!userInfo) {
@@ -171,7 +171,7 @@ export const otpVerification = async (req, res, next) => {
       where: {
         email,
         is_verified: false,
-        is_delete: false,
+        is_deleted: false,
       },
     });
 
@@ -243,7 +243,7 @@ export const signIn = async (req, res, next) => {
       ],
       where: {
         email,
-        is_delete: false,
+        is_deleted: false,
       },
     });
     if (!userInfo) {
@@ -389,7 +389,7 @@ export const getProfile = async (req, res, next) => {
       where: {
         id,
         is_verified: true,
-        is_delete: false,
+        is_deleted: false,
       },
     });
     if (!userInfo) {
@@ -417,7 +417,7 @@ export const forgotPassword = async (req, res, next) => {
     let userInfo = await users.findOne({
       where: {
         email,
-        is_delete: false,
+        is_deleted: false,
       },
     });
     if (!userInfo) {
@@ -469,7 +469,7 @@ export const resetPassword = async (req, res, next) => {
     let userInfo = await users.findOne({
       where: {
         reset_link,
-        is_delete: false,
+        is_deleted: false,
       },
     });
     if (!userInfo) {

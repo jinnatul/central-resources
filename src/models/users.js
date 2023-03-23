@@ -16,7 +16,7 @@ const users = sequelize.define(
     otp: { type: STRING, allowNull: true },
     otp_expire: { type: DATE, allowNull: true },
     is_verified: { type: BOOLEAN, defaultValue: false },
-    is_delete: { type: BOOLEAN, defaultValue: false },
+    is_deleted: { type: BOOLEAN, defaultValue: false },
     mfa_secret: { type: STRING, allowNull: false },
     mfa_qr: { type: STRING, allowNull: false },
     mfa_enables: { type: BOOLEAN, defaultValue: false },
