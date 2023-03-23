@@ -1,26 +1,26 @@
-import { AES } from 'crypto-js';
-import bcrypt from 'bcryptjs';
-import moment from 'moment';
-import speakeasy from 'speakeasy';
-import users from '../models/users';
-import userRoleMaps from '../models/userRoleMaps';
-import sendEmail from '../config/sendEmail';
-import { signUpTemplate } from '../utils/templates/signUpMail';
-import { forgotTemplate } from '../utils/templates/forgotMail';
-import sendMessage from '../utils/responses/sendMessage';
-import sendData from '../utils/responses/sendData';
-import createJWT from '../utils/createJWT';
-import createMFA from '../utils/createMFA';
-import {
+const { AES } = require('crypto-js');
+const bcrypt = require('bcryptjs');
+const moment = require('moment');
+const speakeasy = require('speakeasy');
+const users = require('../models/users');
+const userRoleMaps = require('../models/userRoleMaps');
+const sendEmail = require('../config/sendEmail');
+const { signUpTemplate } = require('../utils/templates/signUpMail');
+const { forgotTemplate } = require('../utils/templates/forgotMail');
+const sendMessage = require('../utils/responses/sendMessage');
+const sendData = require('../utils/responses/sendData');
+const createJWT = require('../utils/createJWT');
+const createMFA = require('../utils/createMFA');
+const {
   validateSignUp,
   validateResentOtp,
   validateOtpVerification,
   validateSignIn,
   validateMfaVerification,
   validateResetPassword,
-} from '../models/validations';
+} = require('../models/validations');
 
-export const googleAuth = async (req, res, next) => {
+exports.googleAuth = async (req, res, next) => {
   try {
     const { status, id, f_name, l_name, token } = await req.user;
     if (status === 'success') {
@@ -45,7 +45,7 @@ export const googleAuth = async (req, res, next) => {
   }
 };
 
-export const signUp = async (req, res, next) => {
+exports.signUp = async (req, res, next) => {
   try {
     await validateSignUp.validateAsync(req.body);
 
@@ -102,7 +102,7 @@ export const signUp = async (req, res, next) => {
   }
 };
 
-export const resentOtp = async (req, res, next) => {
+exports.resentOtp = async (req, res, next) => {
   try {
     await validateResentOtp.validateAsync(req.body);
 
@@ -155,7 +155,7 @@ export const resentOtp = async (req, res, next) => {
   }
 };
 
-export const otpVerification = async (req, res, next) => {
+exports.otpVerification = async (req, res, next) => {
   try {
     await validateOtpVerification.validateAsync(req.body);
 
@@ -228,7 +228,7 @@ export const otpVerification = async (req, res, next) => {
   }
 };
 
-export const signIn = async (req, res, next) => {
+exports.signIn = async (req, res, next) => {
   try {
     await validateSignIn.validateAsync(req.body);
 
@@ -323,7 +323,7 @@ export const signIn = async (req, res, next) => {
   }
 };
 
-export const mfaVerification = async (req, res, next) => {
+exports.mfaVerification = async (req, res, next) => {
   try {
     await validateMfaVerification.validateAsync(req.body);
 
@@ -380,7 +380,7 @@ export const mfaVerification = async (req, res, next) => {
   }
 };
 
-export const getProfile = async (req, res, next) => {
+exports.getProfile = async (req, res, next) => {
   try {
     const { id } = req.user;
 
@@ -408,7 +408,7 @@ export const getProfile = async (req, res, next) => {
   }
 };
 
-export const forgotPassword = async (req, res, next) => {
+exports.forgotPassword = async (req, res, next) => {
   try {
     await validateResentOtp.validateAsync(req.body);
 
@@ -460,7 +460,7 @@ export const forgotPassword = async (req, res, next) => {
   }
 };
 
-export const resetPassword = async (req, res, next) => {
+exports.resetPassword = async (req, res, next) => {
   try {
     await validateResetPassword.validateAsync(req.body);
 

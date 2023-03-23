@@ -1,4 +1,4 @@
-export const fignUpTemplate = (otp, name) => {
+exports.fignUpTemplate = (otp, name) => {
   return `
   <html xmlns="http://www.w3.org/1999/xhtml">
 

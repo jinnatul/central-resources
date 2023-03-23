@@ -5,4 +5,4 @@ const sendData = (res, data, status) => {
   });
 };
 
-export default sendData;
+module.exports = sendData;

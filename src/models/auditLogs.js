@@ -1,5 +1,5 @@
-import { DataTypes, literal } from 'sequelize';
-import sequelize from '../config/database';
+const { DataTypes, literal } = require('sequelize');
+const sequelize = require('../config/database');
 
 const { STRING, INTEGER, BOOLEAN, JSONB } = DataTypes;
 
@@ -32,4 +32,4 @@ const auditLogs = sequelize.define(
   }
 );
 
-export default auditLogs;
+module.exports = auditLogs;

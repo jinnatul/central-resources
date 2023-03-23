@@ -5,4 +5,4 @@ const sendMessage = (res, message, status) => {
   });
 };
 
-export default sendMessage;
+module.exports = sendMessage;

@@ -1,4 +1,4 @@
-export const forgotTemplate = (name, link) => {
+exports.forgotTemplate = (name, link) => {
   return `
   <!DOCTYPE html>
   <html>

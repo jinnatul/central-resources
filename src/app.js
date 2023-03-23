@@ -1,18 +1,38 @@
-import express, { json } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import router from './routes/router';
-import globalErrorHandler from './utils/errors/globalErrorHandler';
-import sendMessage from './utils/responses/sendMessage';
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const hpp = require('hpp');
+const useragent = require('express-useragent');
+const rateLimit = require('express-rate-limit');
+const router = require('./routes/router');
+const globalErrorHandler = require('./utils/errors/globalErrorHandler');
+const sendMessage = require('./utils/responses/sendMessage');
 
 const app = express();
 
 // Middleware
-app.use(json());
+app.use(express.json());
 app.use(cors());
 app.use(helmet());
-app.use(morgan('tiny'));
+app.use(morgan('[:date[iso]] :method :url :status :res[content-length] - :response-time ms'));
+app.use(useragent.express());
+
+// security
+app.use(
+  rateLimit({
+    windowMs: 60 * 1000, // 1 min
+    max: 50,
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: {
+      status: 429,
+      message: 'Too many request created from this IP, please try again after one minute',
+    },
+  })
+);
+app.set('trust proxy', 1);
+app.use(hpp());
 
 // Router
 app.get('/', (req, res, next) => {
@@ -32,4 +52,4 @@ app.all('*', (req, res, next) => {
 // Error handler
 app.use(globalErrorHandler);
 
-export default app;
+module.exports = app;

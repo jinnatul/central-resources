@@ -1,5 +1,5 @@
-import { DataTypes, literal } from 'sequelize';
-import sequelize from '../config/database';
+const { DataTypes, literal } = require('sequelize');
+const sequelize = require('../config/database');
 
 const { INTEGER, BOOLEAN } = DataTypes;
 
@@ -26,4 +26,4 @@ const userRoleMaps = sequelize.define(
   }
 );
 
-export default userRoleMaps;
+module.exports = userRoleMaps;

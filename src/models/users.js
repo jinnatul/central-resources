@@ -1,6 +1,6 @@
-import { DataTypes, literal } from 'sequelize';
-import sequelize from '../config/database';
-import userRoleMaps from '../models/userRoleMaps';
+const { DataTypes, literal } = require('sequelize');
+const sequelize = require('../config/database');
+const userRoleMaps = require('../models/userRoleMaps');
 
 const { STRING, DATE, BOOLEAN } = DataTypes;
 
@@ -40,4 +40,4 @@ const users = sequelize.define(
 
 users.hasOne(userRoleMaps, { as: 'role_info', foreignKey: 'user_id' });
 
-export default users;
+module.exports = users;

@@ -1,8 +1,8 @@
-import passport from 'passport';
-import { Strategy } from 'passport-google-oauth20';
-import users from '../models/users';
-import userRoleMaps from '../models/userRoleMaps';
-import createJWT from '../utils/createJWT';
+const passport = require('passport');
+const { Strategy } = require('passport-google-oauth20');
+const users = require('../models/users');
+const userRoleMaps = require('../models/userRoleMaps');
+const createJWT = require('../utils/createJWT');
 
 const generateToken = async (profile) => {
   const { given_name, family_name, email } = profile._json;
@@ -64,4 +64,4 @@ passport.deserializeUser((obj, cb) => {
   cb(null, obj);
 });
 
-export default passport;
+module.exports = passport;

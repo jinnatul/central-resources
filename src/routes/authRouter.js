@@ -1,6 +1,6 @@
-import { Router } from 'express';
-import { googleRequest } from '../middlewares/google';
-import {
+const { Router } = require('express');
+const { googleRequest } = require('../middlewares/google');
+const {
   googleAuth,
   signUp,
   resentOtp,
@@ -10,8 +10,8 @@ import {
   getProfile,
   forgotPassword,
   resetPassword,
-} from '../controllers/authController';
-import authorizedUser from '../middlewares/authorizedUser';
+} = require('../controllers/authController');
+const authorizedUser = require('../middlewares/authorizedUser');
 
 const router = Router();
 
@@ -28,4 +28,4 @@ router.post('/reset-password', resetPassword);
 router.use(authorizedUser);
 router.get('/profile', getProfile);
 
-export default router;
+module.exports = router;

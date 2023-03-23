@@ -1,5 +1,5 @@
-import app from './app';
-import sequelize from './config/database';
+const app = require('./app');
+const sequelize = require('./config/database');
 
 // Db connection
 sequelize

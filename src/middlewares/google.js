@@ -1,5 +1,5 @@
-import passport from '../config/passport';
+const passport = require('../config/passport');
 
-export const googleRequest = passport.authenticate('google', {
+exports.googleRequest = passport.authenticate('google', {
   scope: ['email', 'profile'],
 });

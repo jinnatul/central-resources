@@ -1,6 +1,6 @@
-import speakeasy from 'speakeasy';
-import qrcode from 'qrcode';
-import cloudinary from '../config/cloudinary';
+const speakeasy = require('speakeasy');
+const qrcode = require('qrcode');
+const cloudinary = require('../config/cloudinary');
 
 const createMFA = async () => {
   const { base32, otpauth_url } = speakeasy.generateSecret();
@@ -14,4 +14,4 @@ const createMFA = async () => {
   };
 };
 
-export default createMFA;
+module.exports = createMFA;
