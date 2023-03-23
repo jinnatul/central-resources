@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const fileUpload = require('express-fileupload');
+const rateLimit = require('express-rate-limit');
 const hpp = require('hpp');
 const useragent = require('express-useragent');
-const rateLimit = require('express-rate-limit');
 const router = require('./routes/router');
 const globalErrorHandler = require('./utils/errors/globalErrorHandler');
 const sendMessage = require('./utils/responses/sendMessage');
@@ -14,9 +15,13 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
-app.use(helmet());
 app.use(morgan('[:date[iso]] :method :url :status :res[content-length] - :response-time ms'));
 app.use(useragent.express());
+app.use(
+  fileUpload({
+    useTempFiles: true,
+  })
+);
 
 // security
 app.use(
@@ -31,8 +36,9 @@ app.use(
     },
   })
 );
-app.set('trust proxy', 1);
+app.use(helmet());
 app.use(hpp());
+app.set('trust proxy', 1);
 
 // Router
 app.get('/', (req, res, next) => {
