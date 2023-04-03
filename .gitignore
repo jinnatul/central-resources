@@ -1,1 +1,4 @@
+/.yarn
 /node_modules
+.yarnrc.yml
+.pnp.*
