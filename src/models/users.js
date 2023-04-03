@@ -32,7 +32,7 @@ const users = sequelize.define(
   },
   {
     timestamps: true,
-    schema: process.env.Schema,
+    SCHEMA: process.env.SCHEMA,
     createdAt: 'created_at',
     updatedAt: 'updated_at',
   }
