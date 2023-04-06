@@ -2,7 +2,7 @@ const passport = require('passport');
 const { Strategy } = require('passport-google-oauth20');
 const users = require('../models/users');
 const userRoleMaps = require('../models/userRoleMaps');
-const createJWT = require('../utils/createJWT');
+const createMFA = require('../utils/createMFA');
 
 const generateToken = async (profile) => {
   const { given_name, family_name, email } = profile._json;
@@ -12,7 +12,7 @@ const generateToken = async (profile) => {
   });
 
   if (!userInfo) {
-    const { mfa_secret, mfa_qr } = await createJWT();
+    const { mfa_secret, mfa_qr } = await createMFA();
     userInfo = await users.create({
       f_name: given_name,
       l_name: family_name,
