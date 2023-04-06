@@ -2,7 +2,7 @@ import passport from 'passport';
 import { Strategy } from 'passport-google-oauth20';
 import users from '../models/users';
 import userRoleMaps from '../models/userRoleMaps';
-import createJWT from '../utils/createJWT';
+import createMFA from '../utils/createMFA';
 
 const generateToken = async (profile) => {
   const { given_name, family_name, email } = profile._json;
@@ -12,7 +12,7 @@ const generateToken = async (profile) => {
   });
 
   if (!userInfo) {
-    const { mfa_secret, mfa_qr } = await createJWT();
+    const { mfa_secret, mfa_qr } = await createMFA();
     userInfo = await users.create({
       f_name: given_name,
       l_name: family_name,
